@@ -1,266 +1,174 @@
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+
+#include <QtWidgets>
+
 #include "flowlayout.h"
-
-class FlowLayout::Impl
+//! [1]
+FlowLayout::FlowLayout(QWidget *parent, int margin, int hSpacing, int vSpacing)
+    : QLayout(parent), m_hSpace(hSpacing), m_vSpace(vSpacing)
 {
-public:
-	int					m_hSpace;			///< 水平间距    
-	int					m_vSpace;			///< 垂直间距
-	QList<QLayoutItem*> m_itemList;			///< 控件列表
-	FlowLayout* m_flowLayout;			///< 主流式布局类
-
-	Impl(FlowLayout* parent, int margin, int hSpacing, int vSpacing) : m_flowLayout(parent), m_hSpace(hSpacing), m_vSpace(vSpacing) {}
-
-	/** 布局布置 */
-	int doLayout(const QRect& rect, bool testOnly) const;
-
-	/** 组件之间间距计算 */
-	int calSmartSpacing(QStyle::PixelMetric pm) const;
-};
-
-/** *******************************************************************
-* @brief  	   构造
-* @param[in]   parent ———— 父窗体
-* @param[in]   margin ———— 外边距
-* @param[in]   hSpacing ———— 水平间距
-* @param[in]   vSpacing ———— 垂直边距
-* @return      void
-******************************************************************** */
-FlowLayout::FlowLayout(QWidget* parent, int margin, int hSpacing, int vSpacing)
-	: QLayout(parent), impl_(new Impl(this, margin, hSpacing, vSpacing))
-{
-	setContentsMargins(margin, margin, margin, margin);
+    setContentsMargins(margin, margin, margin, margin);
 }
 
-/** *******************************************************************
-* @brief  	   构造
-* @param[in]   margin ———— 外边距
-* @param[in]   hSpacing ———— 水平间距
-* @param[in]   vSpacing ———— 垂直边距
-* @return      void
-******************************************************************** */
 FlowLayout::FlowLayout(int margin, int hSpacing, int vSpacing)
-	: impl_(new Impl(this, margin, hSpacing, vSpacing))
+    : m_hSpace(hSpacing), m_vSpace(vSpacing)
 {
-	setContentsMargins(margin, margin, margin, margin);
+    setContentsMargins(margin, margin, margin, margin);
 }
+//! [1]
 
-/** *******************************************************************
-* @brief  	   析构
-* @return      void
-******************************************************************** */
+//! [2]
 FlowLayout::~FlowLayout()
 {
-	QLayoutItem* item;
-	while ((item = takeAt(0)))
-	{
-		delete item;
-	}
-	delete impl_;
+    QLayoutItem *item;
+    while ((item = takeAt(0)))
+        delete item;
 }
+//! [2]
 
-/** *******************************************************************
-* @brief  	   向布局中添加项
-* @param[in]   item ———— 项
-* @return      void
-******************************************************************** */
-void FlowLayout::addItem(QLayoutItem* item)
+//! [3]
+void FlowLayout::addItem(QLayoutItem *item)
 {
-	if (item == Q_NULLPTR)
-	{
-		return;
-	}
-	impl_->m_itemList.append(item);
+    itemList.append(item);
 }
+//! [3]
 
-/** *******************************************************************
-* @brief  	   获取控件水平间距
-* @return      void
-******************************************************************** */
-int FlowLayout::getHorizontalSpacing() const
+//! [4]
+int FlowLayout::horizontalSpacing() const
 {
-	if (impl_->m_hSpace >= 0)
-	{
-		return impl_->m_hSpace;
-	}
-
-	return impl_->calSmartSpacing(QStyle::PM_LayoutHorizontalSpacing);
+    if (m_hSpace >= 0) {
+        return m_hSpace;
+    } else {
+        return smartSpacing(QStyle::PM_LayoutHorizontalSpacing);
+    }
 }
 
-/** *******************************************************************
-* @brief  	   获取控件垂直间距
-* @return      void
-******************************************************************** */
-int FlowLayout::getVerticalSpacing() const
+int FlowLayout::verticalSpacing() const
 {
-	if (impl_->m_vSpace >= 0)
-	{
-		return impl_->m_vSpace;
-	}
-
-	return impl_->calSmartSpacing(QStyle::PM_LayoutVerticalSpacing);
+    if (m_vSpace >= 0) {
+        return m_vSpace;
+    } else {
+        return smartSpacing(QStyle::PM_LayoutVerticalSpacing);
+    }
 }
+//! [4]
 
-/** *******************************************************************
-* @brief  	   获取控件数量
-* @return      int
-******************************************************************** */
+//! [5]
 int FlowLayout::count() const
 {
-	return impl_->m_itemList.size();
+    return itemList.size();
 }
 
-/** *******************************************************************
-* @brief  	   获取布局中某一项
-* @param[in]   index ———— 索引
-* @return      QLayoutItem
-******************************************************************** */
-QLayoutItem* FlowLayout::itemAt(int index) const
+QLayoutItem *FlowLayout::itemAt(int index) const
 {
-	if (index >= 0 && index < impl_->m_itemList.size())
-	{
-		return impl_->m_itemList.value(index);
-	}
-	return nullptr;
+    return itemList.value(index);
 }
 
-/** *******************************************************************
-* @brief  	   从布局中删除某一项并返回该项
-* @param[in]   index ———— 索引
-* @return      QLayoutItem
-******************************************************************** */
-QLayoutItem* FlowLayout::takeAt(int index)
+QLayoutItem *FlowLayout::takeAt(int index)
 {
-	if (index >= 0 && index < impl_->m_itemList.size())
-	{
-		return impl_->m_itemList.takeAt(index);
-	}
-	return nullptr;
+    if (index >= 0 && index < itemList.size())
+        return itemList.takeAt(index);
+    return nullptr;
 }
+//! [5]
 
-/** *******************************************************************
-* @brief  	   设置布局矩形尺寸
-* @param[in]   rect ———— 矩形尺寸
-* @return      void
-******************************************************************** */
-void FlowLayout::setGeometry(const QRect& rect)
+//! [6]
+Qt::Orientations FlowLayout::expandingDirections() const
 {
-	QLayout::setGeometry(rect);
-	impl_->doLayout(rect, false);
+    return { };
+}
+//! [6]
+
+//! [7]
+bool FlowLayout::hasHeightForWidth() const
+{
+    return true;
 }
 
-/** *******************************************************************
-* @brief  	   获取布局首选尺寸
-* @return      QSize
-******************************************************************** */
+int FlowLayout::heightForWidth(int width) const
+{
+    int height = doLayout(QRect(0, 0, width, 0), true);
+    return height;
+}
+//! [7]
+
+//! [8]
+void FlowLayout::setGeometry(const QRect &rect)
+{
+    QLayout::setGeometry(rect);
+    doLayout(rect, false);
+}
+
 QSize FlowLayout::sizeHint() const
 {
-	return minimumSize();
+    return minimumSize();
 }
 
-/** *******************************************************************
-* @brief  	   获取布局最小尺寸
-* @return      QSize
-******************************************************************** */
 QSize FlowLayout::minimumSize() const
 {
-	QSize size;
-	for (const QLayoutItem* item : std::as_const(impl_->m_itemList))
-	{
-		size = size.expandedTo(item->minimumSize());
-	}
+    QSize size;
+    for (const QLayoutItem *item : std::as_const(itemList))
+        size = size.expandedTo(item->minimumSize());
 
-	const QMargins margins = contentsMargins();
-	size += QSize(margins.left() + margins.right(), margins.top() + margins.bottom());
-	return size;
+    const QMargins margins = contentsMargins();
+    size += QSize(margins.left() + margins.right(), margins.top() + margins.bottom());
+    return size;
 }
+//! [8]
 
-/** *******************************************************************
-* @brief  	   布局布置
-* @param[in]   rect ———— 矩形尺寸
-* @param[in]   testOnly ———— 是否是测试
-* @return      int
-******************************************************************** */
-int FlowLayout::Impl::doLayout(const QRect& rect, bool testOnly) const
+//! [9]
+int FlowLayout::doLayout(const QRect &rect, bool testOnly) const
 {
-	int left, top, right, bottom;
-	/** 获取布局中可用部分 */
-	m_flowLayout->getContentsMargins(&left, &top, &right, &bottom);
-	QRect effectiveRect = rect.adjusted(+left, +top, -right, -bottom);
-	int x = effectiveRect.x();
-	int y = effectiveRect.y();
-	int lineHeight = 0;
+    int left, top, right, bottom;
+    getContentsMargins(&left, &top, &right, &bottom);
+    QRect effectiveRect = rect.adjusted(+left, +top, -right, -bottom);
+    int x = effectiveRect.x();
+    int y = effectiveRect.y();
+    int lineHeight = 0;
+//! [9]
 
-	/** 根据当前布局内部件设置适当间隙 */
-	for (QLayoutItem* item : std::as_const(m_itemList))
-	{
-		const QWidget* wid = item->widget();
-		int spaceX = m_flowLayout->getHorizontalSpacing();
-		if (spaceX == -1)
-		{
-			spaceX = wid->style()->layoutSpacing(
-				QSizePolicy::PushButton, QSizePolicy::PushButton, Qt::Horizontal);
-		}
+//! [10]
+    for (QLayoutItem *item : std::as_const(itemList)) {
+        const QWidget *wid = item->widget();
+        int spaceX = horizontalSpacing();
+        if (spaceX == -1)
+            spaceX = wid->style()->layoutSpacing(
+                QSizePolicy::PushButton, QSizePolicy::PushButton, Qt::Horizontal);
+        int spaceY = verticalSpacing();
+        if (spaceY == -1)
+            spaceY = wid->style()->layoutSpacing(
+                QSizePolicy::PushButton, QSizePolicy::PushButton, Qt::Vertical);
+//! [10]
+//! [11]
+        int nextX = x + item->sizeHint().width() + spaceX;
+        if (nextX - spaceX > effectiveRect.right() && lineHeight > 0) {
+            x = effectiveRect.x();
+            y = y + lineHeight + spaceY;
+            nextX = x + item->sizeHint().width() + spaceX;
+            lineHeight = 0;
+        }
 
-		int spaceY = m_flowLayout->getVerticalSpacing();
-		if (spaceY == -1)
-		{
-			spaceY = wid->style()->layoutSpacing(
-				QSizePolicy::PushButton, QSizePolicy::PushButton, Qt::Vertical);
-		}
+        if (!testOnly)
+            item->setGeometry(QRect(QPoint(x, y), item->sizeHint()));
 
-		/** 计算每个控件的位置 */
-		int nextX = x + item->sizeHint().width() + spaceX;
-		if (nextX - spaceX > effectiveRect.right() && lineHeight > 0)
-		{
-			x = effectiveRect.x();
-			y = y + lineHeight + spaceY;
-			nextX = x + item->sizeHint().width() + spaceX;
-			lineHeight = 0;
-		}
-
-		if (!testOnly)
-		{
-			item->setGeometry(QRect(QPoint(x, y), item->sizeHint()));
-		}
-		x = nextX;
-		lineHeight = qMax(lineHeight, item->sizeHint().height());
-	}
-	return y + lineHeight - rect.y() + bottom;
+        x = nextX;
+        lineHeight = qMax(lineHeight, item->sizeHint().height());
+    }
+    return y + lineHeight - rect.y() + bottom;
 }
-
-/** *******************************************************************
-* @brief  	   组件之间距离计算
-* @param[in]   pm ———— 间距样式
-* @return      int
-******************************************************************** */
-int FlowLayout::Impl::calSmartSpacing(QStyle::PixelMetric pm) const
+//! [11]
+//! [12]
+int FlowLayout::smartSpacing(QStyle::PixelMetric pm) const
 {
-	QObject* parent = m_flowLayout->parent();
-	if (!parent)
-	{
-		return -1;
-	}
-	else if (parent->isWidgetType())
-	{
-		QWidget* pw = static_cast<QWidget*>(parent);
-		return pw->style()->pixelMetric(pm, nullptr, pw);
-	}
-
-	return static_cast<QLayout*>(parent)->spacing();
+    QObject *parent = this->parent();
+    if (!parent) {
+        return -1;
+    } else if (parent->isWidgetType()) {
+        QWidget *pw = static_cast<QWidget *>(parent);
+        return pw->style()->pixelMetric(pm, nullptr, pw);
+    } else {
+        return static_cast<QLayout *>(parent)->spacing();
+    }
 }
-
-/** *******************************************************************
-* @brief  	   删除某一控件
-* @param[in]   item ———— 控件
-* @return      int
-******************************************************************** */
-void FlowLayout::removeItem(QLayoutItem* item)
-{
-	if (item == Q_NULLPTR)
-	{
-		return;
-	}
-	impl_->m_itemList.removeOne(item);
-	item->widget()->setParent(nullptr);
-	delete item;
-}
+//! [12]

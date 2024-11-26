@@ -14,6 +14,7 @@
 #include "propertybrowser/qteditorfactory.h"
 
 #include "flowlayout/flowlayout.h"
+#include "easywidget/scrollarea.h"
 
 #include "colorwidget.h"
 
@@ -57,7 +58,6 @@ private:
 	ColorWidget* m_pColorWidget;
 	QPlainTextEdit* m_pColorInfo;
 	FlowLayout* m_pHistoryLayout;
-	QWidget* m_pHistoryWidget;
 	ColorWidget* m_pCurColorWidget;
 
 	//action

@@ -40,7 +40,7 @@ void MainWindow::showEvent(QShowEvent* event)
 {
 	m_pHSplitter->setSizes({ 100,200});
 	m_pLeftVSplitter->setSizes({ 100,200 });
-	m_pRightVSplitter->setSizes({ 100,200 });
+	m_pRightVSplitter->setSizes({ 100,200,200 });
 }
 
 void MainWindow::initStyle()
@@ -84,7 +84,6 @@ void MainWindow::initLayout()
 	//中心窗体
 	auto central = new QWidget;
 	setCentralWidget(central);
-	central->setEnabled(false);
 
 	//中心窗体的布局
 	auto mainLayout = new QHBoxLayout(central);
@@ -100,10 +99,20 @@ void MainWindow::initLayout()
 
 	m_pRightVSplitter = new QSplitter(Qt::Vertical);
 	m_pColorWidget = new ColorWidget;
-	m_pHistoryWidget = new QWidget;
-	m_pHistoryLayout = new FlowLayout(m_pHistoryWidget);
+	auto commonColorWidget = new ScrollArea;
+	auto commonColorLayout = new FlowLayout(commonColorWidget->getRealWidget());
+	for (auto& color : QtCpp::getCommonColor())
+	{
+		auto widget = new ColorWidget;
+		widget->setColor(QColor(color));
+		commonColorLayout->addWidget(widget);
+		connect(widget, &ColorWidget::signalClicked, [=]() {slotChangeColor(widget); });
+	}
+	auto historyColorWidget = new ScrollArea;
+	m_pHistoryLayout = new FlowLayout(historyColorWidget->getRealWidget());
 	m_pRightVSplitter->addWidget(m_pColorWidget);
-	m_pRightVSplitter->addWidget(m_pHistoryWidget);
+	m_pRightVSplitter->addWidget(commonColorWidget);
+	m_pRightVSplitter->addWidget(historyColorWidget);
 	m_pHSplitter->addWidget(m_pRightVSplitter);
 }
 

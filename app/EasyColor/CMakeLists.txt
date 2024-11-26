@@ -18,6 +18,7 @@ target_link_libraries(${TARGET_NAME} PUBLIC
     propertybrowser
     flowlayout
     qtcpp
+    easywidget
 )
 
 

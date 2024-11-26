@@ -7,7 +7,7 @@ int main(int argc, char** argv)
 	QApplication app(argc, argv);
 
 	MainWindow mw;
-	mw.resize(500, 300);
+	mw.resize(500, 400);
 	mw.show();
 
 	return app.exec();
