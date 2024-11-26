@@ -1,4 +1,8 @@
 <RCC>
     <qresource prefix="/">
+		<file>qss/common.qss</file>
+		<file>images/run.png</file>
+		<file>images/stop.png</file>
+		<file>images/ok.png</file>
 	</qresource>
 </RCC>
