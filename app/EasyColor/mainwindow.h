@@ -16,11 +16,12 @@
 #include "flowlayout/flowlayout.h"
 #include "easywidget/scrollarea.h"
 
-#include "colorwidget.h"
+#include "colorbox.h"
 
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT
+
 public:
 	MainWindow(QWidget* parent = nullptr);
 	~MainWindow();
@@ -34,38 +35,34 @@ private:
 	void initPropertyBrowser();
 	void initLayout();
 
-	void updateColorInfo(QColor color);
+	void updateColor(QColor color);
 
 	void slotPickColor();
 	void slotAction(QAction* action);
-	void slotChangeColor(ColorWidget* colorWidget);
+	void slotColorBoxClicked(ColorBox* colorBox);
 	void slotColorPropChanged(QtProperty* prop, const QColor& color);
 
 	//property browser
-	QtGroupBoxPropertyBrowser* m_pBrowser;
+	QtProperty*					m_pPropColor;
+	QtSliderFactory*			m_pFacSlider;
+	QtColorPropertyManager*		m_pMngColor;
+	QtGroupBoxPropertyBrowser*	m_pBrowser;
 
-	QtColorPropertyManager* m_pColorMngCanEdit;
-	QtSliderFactory* m_pSliderFac;
-
-	QtProperty* m_pColorProp;
+	//界面布局 
+	QSplitter*					m_pHSplitter;
+	QSplitter*					m_pLeftVSplitter;
+	QSplitter*					m_pRightVSplitter;
 	
+	ColorBox*					m_pColorDisplay;
+	QPlainTextEdit*				m_pColorInfo;
+	EasyLib::FlowLayout*		m_pHistoryColorLayout;
 
-	//splitter 
-	QSplitter* m_pHSplitter;
-	QSplitter* m_pLeftVSplitter;
-	QSplitter* m_pRightVSplitter;
-	
-	ColorWidget* m_pColorWidget;
-	QPlainTextEdit* m_pColorInfo;
-	FlowLayout* m_pHistoryLayout;
-	ColorWidget* m_pCurColorWidget;
+	QAction*					m_pStartPick;
+	QAction*					m_pConfirmPick;
 
-	//action
-	QAction* m_pStartPick;
-	QAction* m_pEndPick;
-	QAction* m_pConfirmPick;
-
-	QTimer* m_pPickTimer;
+	//其他
+	QTimer*						m_pPickTimer;
+	ColorBox*					m_pCurColorBox;
 };
 
 #endif

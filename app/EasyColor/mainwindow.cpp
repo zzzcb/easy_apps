@@ -18,12 +18,11 @@ QAction* newAction(QString text, QIcon icon,QKeySequence seq)
 }
 
 MainWindow::MainWindow(QWidget* parent /*= nullptr*/)
-	:QMainWindow(parent), m_pCurColorWidget(nullptr)
+	:QMainWindow(parent), m_pCurColorBox(nullptr)
 {
 	initStyle();
 	initToolbar();
 	initPropertyBrowser();
-
 	initLayout();
 	
 	//定时器
@@ -47,14 +46,14 @@ void MainWindow::initStyle()
 {
 	//界面美化
 	qApp->setStyle(QStyleFactory::create("Fusion"));
-	qApp->setStyleSheet(QtCpp::getFileContent(":/qss/common.qss"));
+	qApp->setStyleSheet(EasyLib::QtCpp::getFileContent(":/qss/common.qss"));
 }
 
 void MainWindow::initToolbar()
 {
-	//菜单、快捷键
-	m_pStartPick = newAction("开始拾取颜色",QtCpp::createIcon(":/images/run.png"), QKeySequence("Ctrl+S"));
-	m_pConfirmPick = newAction("确定拾取颜色", QtCpp::createIcon(":/images/ok.png"), QKeySequence("Ctrl+D"));
+	//快捷键
+	m_pStartPick = newAction("开始拾取颜色", EasyLib::QtCpp::createIcon(":/images/run.png"), QKeySequence("Ctrl+S"));
+	m_pConfirmPick = newAction("确定拾取颜色", EasyLib::QtCpp::createIcon(":/images/ok.png"), QKeySequence("Ctrl+D"));
 
 	auto editToolBar = addToolBar("Edit");
 	editToolBar->addAction(m_pStartPick);
@@ -66,17 +65,17 @@ void MainWindow::initToolbar()
 
 void MainWindow::initPropertyBrowser()
 {
-	m_pColorMngCanEdit = new QtColorPropertyManager(this);
-	m_pSliderFac = new QtSliderFactory(this);
+	m_pMngColor = new QtColorPropertyManager(this);
+	m_pFacSlider = new QtSliderFactory(this);
 
 	m_pBrowser = new QtGroupBoxPropertyBrowser;
-	m_pBrowser->setFactoryForManager(m_pColorMngCanEdit->subIntPropertyManager(), m_pSliderFac);
+	m_pBrowser->setFactoryForManager(m_pMngColor->subIntPropertyManager(), m_pFacSlider);
 
 	//添加颜色属性
-	m_pColorProp = m_pColorMngCanEdit->addProperty("颜色");
-	m_pBrowser->addProperty(m_pColorProp);
+	m_pPropColor = m_pMngColor->addProperty("颜色");
+	m_pBrowser->addProperty(m_pPropColor);
 
-	connect(m_pColorMngCanEdit, &QtColorPropertyManager::valueChanged, this, &MainWindow::slotColorPropChanged);
+	connect(m_pMngColor, &QtColorPropertyManager::valueChanged, this, &MainWindow::slotColorPropChanged);
 }
 
 void MainWindow::initLayout()
@@ -98,34 +97,34 @@ void MainWindow::initLayout()
 	m_pHSplitter->addWidget(m_pLeftVSplitter);
 
 	m_pRightVSplitter = new QSplitter(Qt::Vertical);
-	m_pColorWidget = new ColorWidget;
-	auto commonColorWidget = new ScrollArea;
-	auto commonColorLayout = new FlowLayout(commonColorWidget->getRealWidget());
-	for (auto& color : QtCpp::getCommonColor())
+	m_pColorDisplay = new ColorBox;
+	auto commonColorArea = new EasyLib::ScrollArea;
+	auto commonColorLayout = new EasyLib::FlowLayout(commonColorArea->getRealWidget());
+	for (auto& color : EasyLib::QtCpp::getCommonColor())
 	{
-		auto widget = new ColorWidget;
+		auto widget = new ColorBox;
 		widget->setColor(QColor(color));
 		commonColorLayout->addWidget(widget);
-		connect(widget, &ColorWidget::signalClicked, [=]() {slotChangeColor(widget); });
+		connect(widget, &ColorBox::signalClicked, [=]() {slotColorBoxClicked(widget); });
 	}
-	auto historyColorWidget = new ScrollArea;
-	m_pHistoryLayout = new FlowLayout(historyColorWidget->getRealWidget());
-	m_pRightVSplitter->addWidget(m_pColorWidget);
-	m_pRightVSplitter->addWidget(commonColorWidget);
-	m_pRightVSplitter->addWidget(historyColorWidget);
+	auto historyColorArea = new EasyLib::ScrollArea;
+	m_pHistoryColorLayout = new EasyLib::FlowLayout(historyColorArea->getRealWidget());
+	m_pRightVSplitter->addWidget(m_pColorDisplay);
+	m_pRightVSplitter->addWidget(commonColorArea);
+	m_pRightVSplitter->addWidget(historyColorArea);
 	m_pHSplitter->addWidget(m_pRightVSplitter);
 }
 
-void MainWindow::updateColorInfo(QColor color)
+void MainWindow::updateColor(QColor color)
 {
-	m_pColorWidget->setColor(color);
-	m_pColorMngCanEdit->setValue(m_pColorProp, color);
+	m_pColorDisplay->setColor(color);
+	m_pMngColor->setValue(m_pPropColor, color);
 
 	m_pColorInfo->clear();
 	QStringList clrs;
-	clrs << "HEX:" + QtCpp::getColorText(color, QtCpp::ColorTextType::Em_HEX)
-		<< "HSV:" + QtCpp::getColorText(color, QtCpp::ColorTextType::Em_HSV)
-		<< "RGBA:" + QtCpp::getColorText(color, QtCpp::ColorTextType::Em_RGBA);
+	clrs << "HEX:" + EasyLib::QtCpp::getColorText(color, EasyLib::QtCpp::ColorTextType::Em_HEX)
+		<< "HSV:" + EasyLib::QtCpp::getColorText(color, EasyLib::QtCpp::ColorTextType::Em_HSV)
+		<< "RGBA:" + EasyLib::QtCpp::getColorText(color, EasyLib::QtCpp::ColorTextType::Em_RGBA);
 	for (auto& clr : clrs)
 		m_pColorInfo->appendPlainText(clr);
 }
@@ -133,58 +132,57 @@ void MainWindow::updateColorInfo(QColor color)
 void MainWindow::slotPickColor()
 {
 	auto newPos = QCursor::pos();
-	auto color = QtCpp::grabScreenColor(newPos);
+	auto color = EasyLib::QtCpp::getScreenColor(newPos);
 
-	updateColorInfo(color);
+	updateColor(color);
 }
 
 void MainWindow::slotAction(QAction* action)
 {
 	if (action == m_pStartPick)
 	{
-		m_pColorMngCanEdit->blockSignals(true);
+		m_pMngColor->blockSignals(true);
 		m_pPickTimer->start(30);
 		centralWidget()->setEnabled(false);
 	}
 	else if (action == m_pConfirmPick)
 	{
-		m_pColorMngCanEdit->blockSignals(false);
+		m_pMngColor->blockSignals(false);
 		m_pPickTimer->stop();
 		centralWidget()->setEnabled(true);
 
-		auto clrWidget = new ColorWidget;
-		clrWidget->setColor(m_pColorWidget->getColor());
-		clrWidget->setSelected(true);
-		connect(clrWidget, &ColorWidget::signalClicked, [=]() {slotChangeColor(clrWidget); });
+		auto clrBox = new ColorBox;
+		clrBox->setColor(m_pColorDisplay->getColor());
+		clrBox->setSelected(true);
+		connect(clrBox, &ColorBox::signalClicked, [=]() {slotColorBoxClicked(clrBox); });
 
-		m_pHistoryLayout->addWidget(clrWidget);
+		m_pHistoryColorLayout->addWidget(clrBox);
 
-		if (m_pCurColorWidget)
-		{
-			m_pCurColorWidget->setSelected(false);
-		}
-		m_pCurColorWidget = clrWidget;
+		if (m_pCurColorBox)
+			m_pCurColorBox->setSelected(false);
+
+		m_pCurColorBox = clrBox;
 	}
 }
 
-void MainWindow::slotChangeColor(ColorWidget* colorWidget)
+void MainWindow::slotColorBoxClicked(ColorBox* colorBox)
 {
-	if (m_pCurColorWidget)
-		m_pCurColorWidget->setSelected(false);
+	if (m_pCurColorBox)
+		m_pCurColorBox->setSelected(false);
 
-	colorWidget->setSelected(true);
-	m_pCurColorWidget = colorWidget;
+	colorBox->setSelected(true);
+	m_pCurColorBox = colorBox;
 
-	updateColorInfo(m_pCurColorWidget->getColor());
+	updateColor(m_pCurColorBox->getColor());
 }
 
 void MainWindow::slotColorPropChanged(QtProperty* prop, const QColor& color)
 {
-	if (prop == m_pColorProp)
+	if (prop == m_pPropColor)
 	{
-		updateColorInfo(color);
+		updateColor(color);
 
-		if (m_pCurColorWidget)
-			m_pCurColorWidget->setColor(color);
+		if (m_pCurColorBox)
+			m_pCurColorBox->setColor(color);
 	}
 }

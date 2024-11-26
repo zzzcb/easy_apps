@@ -8,22 +8,25 @@
 
 #include "export.h"
 
-namespace QtCpp
+namespace EasyLib
 {
-	enum ColorTextType
+	namespace QtCpp
 	{
-		Em_NONE,
-		Em_RGBA,
-		Em_HEX,
-		Em_HSV
-	};
+		enum ColorTextType
+		{
+			Em_NONE,
+			Em_RGBA,
+			Em_HEX,
+			Em_HSV
+		};
 
-	QString API_EXPORT getFileContent(QString filePath);
-	QColor API_EXPORT grabScreenColor(const QPoint& p);
-	QIcon API_EXPORT createIcon(const QString& file,bool bDarkIcon = false);
-	QRect API_EXPORT getCurScreenRect();
-	QString API_EXPORT getColorText(QColor clr, ColorTextType type);
-	QStringList API_EXPORT getCommonColor();
-};
+		QIcon		API_EXPORT createIcon(const QString& file, bool bDarkIcon = false);
+		QRect		API_EXPORT getCurScreenRect();
+		QColor		API_EXPORT getScreenColor(const QPoint& pt);
+		QString		API_EXPORT getColorText(QColor clr, ColorTextType type);
+		QString		API_EXPORT getFileContent(QString filePath);
+		QStringList API_EXPORT getCommonColor();
+	}
+}
 
 #endif

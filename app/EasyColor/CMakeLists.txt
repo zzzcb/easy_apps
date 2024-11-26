@@ -4,7 +4,7 @@ get_filename_component(TARGET_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 
 set(SOURCES 
     main.cpp
-    colorwidget.cpp
+    colorbox.cpp
     mainwindow.cpp
     EasyColor.rc
     ${DIR_RESOURCES}/easy_apps.qrc

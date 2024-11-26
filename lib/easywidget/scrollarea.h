@@ -5,17 +5,20 @@
 
 #include "export.h"
 
-class API_EXPORT ScrollArea : public QWidget
+namespace EasyLib
 {
-	Q_OBJECT
-public:
-	ScrollArea(QWidget* parent = nullptr);
-	~ScrollArea();
+	class API_EXPORT ScrollArea : public QWidget
+	{
+		Q_OBJECT
+	public:
+		ScrollArea(QWidget* parent = nullptr);
+		~ScrollArea();
 
-	QWidget* getRealWidget();
+		QWidget* getRealWidget();
 
-private:
-	QWidget* m_pRealWidget;
-};
+	private:
+		QWidget* m_pRealWidget;
+	};
+}
 
 #endif

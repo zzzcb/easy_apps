@@ -9,6 +9,9 @@
 #include <QLayout>
 #include <QRect>
 #include <QStyle>
+
+namespace EasyLib
+{
 //! [0]
 class API_EXPORT FlowLayout : public QLayout
 {
@@ -39,5 +42,7 @@ private:
     int m_vSpace;
 };
 //! [0]
+
+}
 
 #endif // FLOWLAYOUT_H
