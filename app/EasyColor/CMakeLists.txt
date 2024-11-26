@@ -21,4 +21,9 @@ target_link_libraries(${TARGET_NAME} PUBLIC
     easywidget
 )
 
+# 关闭调试窗口
+set_target_properties(${TARGET_NAME} PROPERTIES
+    WIN32_EXECUTABLE ON
+)
+
 
